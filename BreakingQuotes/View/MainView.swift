@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct QuoteView: View {
+struct MainView: View {
     let vm = MainViewModel()
     let show: String
     
@@ -16,7 +16,7 @@ struct QuoteView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Image(show.lowercased().replacingOccurrences(of: " ", with: ""))
+                Image(show.removeCaseAndSpace())
                     .resizable()
                     .frame(width: geo.size.width * 2.7, height: geo.size.height * 1.2)
                 
@@ -25,11 +25,14 @@ struct QuoteView: View {
                         Spacer(minLength: 75)
                         
                         switch vm.status {
+                            
                         case .notStarted:
                             EmptyView()
+                            
                         case .fetching:
                             ProgressView()
-                        case .success:
+                            
+                        case .successQuote:
                             Text("\"\(vm.quote.quote)\"")
                                 .minimumScaleFactor(0.5)
                                 .multilineTextAlignment(.center)
@@ -62,26 +65,48 @@ struct QuoteView: View {
                                 showCharacterInfo.toggle()
                             }
                             
+                        case .successEpisode:
+                            EpisodeView(episode: vm.episode)
+                            
                         case .failed(let error):
                             Text(error.localizedDescription)
                         }
                         
-                        Spacer()
+                        Spacer(minLength: 20)
                     }
                     
-                    Button {
-                        Task {
-                            await vm.getData(for: show)
+                    HStack {
+                        Button {
+                            Task {
+                                await vm.getQuoteData(for: show)
+                            }
+                        } label: {
+                            Text ("Get Random Quote")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background(Color("\(show.removeSpaces())Button"))
+                                .clipShape(.rect(cornerRadius: 15))
+                                .shadow(color: Color("\(show.removeSpaces())Shadow"), radius: 2)
                         }
-                    } label: {
-                        Text ("Get Random Quote")
-                            .font(.title)
-                            .foregroundStyle(.white)
-                            .padding()
-                            .background(Color("\(show.replacingOccurrences(of: " ", with: ""))Button"))
-                            .clipShape(.rect(cornerRadius: 15))
-                            .shadow(color: Color("\(show.replacingOccurrences(of: " ", with: ""))Shadow"), radius: 2)
+                        
+                        Spacer()
+                        
+                        Button {
+                            Task {
+                                await vm.getEpisode(for: show)
+                            }
+                        } label: {
+                            Text ("Get Random Episode")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background(Color("\(show.removeSpaces())Button"))
+                                .clipShape(.rect(cornerRadius: 15))
+                                .shadow(color: Color("\(show.removeSpaces())Shadow"), radius: 2)
+                        }
                     }
+                    .padding(.horizontal, 30)
                     
                     Spacer(minLength: 100)
                 }
@@ -90,6 +115,7 @@ struct QuoteView: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .ignoresSafeArea()
+        .toolbarBackgroundVisibility(.visible, for: .tabBar)
         .sheet(isPresented: $showCharacterInfo) {
             CharacterView(character: vm.character, show: show)
         }
@@ -97,6 +123,6 @@ struct QuoteView: View {
 }
 
 #Preview {
-    QuoteView(show: "Breaking Bad")
+    MainView(show: Constants.BreakingBad)
         .preferredColorScheme(.dark)
 }
