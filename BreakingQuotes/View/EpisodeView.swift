@@ -11,7 +11,7 @@ struct EpisodeView: View {
     let episode : Episode
     
     var body: some View {
-        VStack(alignment: .leading)  {
+        VStack(alignment: .leading) {
             Text(episode.title)
                 .font(.largeTitle)
             
@@ -41,7 +41,7 @@ struct EpisodeView: View {
         }
         .padding()
         .foregroundStyle(.white)
-        .background(.black.opacity(0.6))
+        .background(.black.opacity(0.4))
         .clipShape(.rect(cornerRadius: 25))
         .padding(.horizontal)
     }

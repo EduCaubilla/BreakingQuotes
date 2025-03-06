@@ -15,3 +15,16 @@ struct BreakingQuotesApp: App {
         }
     }
 }
+
+
+/**
+ - Auto fetch on start ✅
+ - First random image no the first of the list ✅
+ - Fetch random character
+ 
+ characters/random -> check if it's from the correct show
+ 
+ -  random quote from character
+ --> let fetchURL = quoteURL.appending(queryItems: [URLQueryItem(name: "character", value: name)])
+ 
+ */

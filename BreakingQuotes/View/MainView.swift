@@ -22,7 +22,7 @@ struct MainView: View {
                 
                 VStack {
                     VStack {
-                        Spacer(minLength: 75)
+                        Spacer(minLength: 65)
                         
                         switch vm.status {
                             
@@ -33,64 +33,38 @@ struct MainView: View {
                             ProgressView()
                             
                         case .successQuote:
-                            Text("\"\(vm.quote.quote)\"")
-                                .minimumScaleFactor(0.5)
-                                .multilineTextAlignment(.center)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background(.black.opacity(0.5))
-                                .clipShape(.rect(cornerRadius: 25))
-                                .padding(.horizontal)
-                                .padding(.bottom, 20)
-                            
-                            ZStack (alignment: .bottom) {
-                                AsyncImage(url: vm.character.images[0]) { imageItem in
-                                    imageItem
-                                        .resizable()
-                                        .scaledToFill()
-                                } placeholder: {
-                                    ProgressView()
+                            QuoteView(quote: vm.quote, character: vm.character)
+                                .onTapGesture {
+                                    showCharacterInfo.toggle()
                                 }
-                                .frame(width: geo.size.width / 1.1, height: geo.size.height / 1.8)
-                                
-                                Text(vm.quote.character)
-                                    .foregroundStyle(.white)
-                                    .padding(10)
-                                    .frame(maxWidth: .infinity)
-                                    .background(.ultraThinMaterial)
-                            }
-                            .frame(width: geo.size.width / 1.1, height: geo.size.height / 1.8)
-                            .clipShape(.rect(cornerRadius: 50))
-                            .onTapGesture {
-                                showCharacterInfo.toggle()
-                            }
                             
                         case .successEpisode:
                             EpisodeView(episode: vm.episode)
                             
+                        case .successCharacter:
+                            CharacterDetailView(character: vm.character)
+
                         case .failed(let error):
                             Text(error.localizedDescription)
                         }
-                        
-                        Spacer(minLength: 20)
                     }
-                    
-                    HStack {
+
+                    VStack {
                         Button {
                             Task {
                                 await vm.getQuoteData(for: show)
                             }
                         } label: {
                             Text ("Get Random Quote")
-                                .font(.title2)
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
-                                .padding()
+                                .frame(width: geo.size.width - 100)
+                                .padding(10)
                                 .background(Color("\(show.removeSpaces())Button"))
                                 .clipShape(.rect(cornerRadius: 15))
                                 .shadow(color: Color("\(show.removeSpaces())Shadow"), radius: 2)
                         }
-                        
-                        Spacer()
+                        .padding(.bottom, 2)
                         
                         Button {
                             Task {
@@ -98,13 +72,32 @@ struct MainView: View {
                             }
                         } label: {
                             Text ("Get Random Episode")
-                                .font(.title2)
+                                .font(.subheadline)
                                 .foregroundStyle(.white)
-                                .padding()
+                                .frame(width: geo.size.width - 100)
+                                .padding(10)
                                 .background(Color("\(show.removeSpaces())Button"))
                                 .clipShape(.rect(cornerRadius: 15))
                                 .shadow(color: Color("\(show.removeSpaces())Shadow"), radius: 2)
                         }
+                        .padding(.bottom, 2)
+                        
+                        Button {
+                            Task {
+                                await vm.getCharacterRandom(for: show)
+                            }
+                        } label: {
+                            Text ("Get Random Character")
+                                .font(.subheadline)
+                                .foregroundStyle(.white)
+                                .frame(width: geo.size.width - 100)
+                                .padding(10)
+                                .background(Color("\(show.removeSpaces())Button"))
+                                .clipShape(.rect(cornerRadius: 15))
+                                .shadow(color: Color("\(show.removeSpaces())Shadow"), radius: 2)
+                                
+                        }
+                        
                     }
                     .padding(.horizontal, 30)
                     
@@ -113,6 +106,9 @@ struct MainView: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .task {
+                    await vm.getQuoteData(for: Constants.BreakingBad)
+                }
         }
         .ignoresSafeArea()
         .toolbarBackgroundVisibility(.visible, for: .tabBar)
